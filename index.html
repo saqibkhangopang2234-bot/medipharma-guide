@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediPharma Guide - Pakistan</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2c3e50; }
+        input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        .card { background: #fff; border-left: 5px solid #3498db; padding: 15px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 4px; }
+        .brand { font-weight: bold; color: #2c3e50; font-size: 18px; }
+        .generic { color: #e74c3c; margin-top: 5px; }
+        .company { color: #7f8c8d; font-size: 14px; margin-top: 3px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>MediPharma Guide Pakistan</h2>
+    <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search brand name, generic formula, or company...">
+
+    <div id="productList">
+        <div class="card">
+            <div class="brand">Panadol</div>
+            <div class="generic">Generic: Paracetamol</div>
+            <div class="company">Company: GSK Pakistan</div>
+        </div>
+        <div class="card">
+            <div class="brand">Nuberol Fort</div>
+            <div class="generic">Generic: Orphenadrine Citrate + Paracetamol</div>
+            <div class="company">Company: Searle Pakistan</div>
+        </div>
+        <div class="card">
+            <div class="brand">Rigix</div>
+            <div class="generic">Generic: Cetirizine Hydrochloride</div>
+            <div class="company">Company: Getz Pharma</div>
+        </div>
+        <div class="card">
+            <div class="brand">Augmentin</div>
+            <div class="generic">Generic: Amoxicillin + Clavulanic Acid</div>
+            <div class="company">Company: GSK Pakistan</div>
+        </div>
+        <div class="card">
+            <div class="brand">Risek</div>
+            <div class="generic">Generic: Omeprazole</div>
+            <div class="company">Company: Getz Pharma</div>
+        </div>
+        <div class="card">
+            <div class="brand">Brufen</div>
+            <div class="generic">Generic: Ibuprofen</div>
+            <div class="company">Company: Abbott Laboratories</div>
+        </div>
+        <div class="card">
+            <div class="brand">Velosef</div>
+            <div class="generic">Generic: Cephradine</div>
+            <div class="company">Company: Bristol-Myers Squibb / Sandoz</div>
+        </div>
+        <div class="card">
+            <div class="brand">Amoxil</div>
+            <div class="generic">Generic: Amoxicillin</div>
+            <div class="company">Company: GSK Pakistan</div>
+        </div>
+        <div class="card">
+            <div class="brand">Ceftin</div>
+            <div class="generic">Generic: Cefuroxime Axetil</div>
+            <div class="company">Company: GlaxoSmithKline</div>
+        </div>
+        <div class="card">
+            <div class="brand">Disprin</div>
+            <div class="generic">Generic: Aspirin (Acetylsalicylic Acid)</div>
+            <div class="company">Company: Reckitt Benckiser</div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterProducts() {
+    let input = document.getElementById('searchInput').value.toLowerCase();
+    let cards = document.getElementsByClassName('card');
+    for (let i = 0; i < cards.length; i++) {
+        let text = cards[i].innerText.toLowerCase();
+        if (text.includes(input)) {
+            cards[i].style.display = "";
+        } else {
+            cards[i].style.display = "none";
+        }
+    }
+}
+</script>
+
+</body>
+</html>
