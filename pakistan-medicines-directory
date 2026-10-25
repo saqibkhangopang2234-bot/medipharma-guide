@@ -1,0 +1,861 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Bilingual Pakistan medicine directory with generic names, brands, uses and safety information.">
+<title>Pakistan Medicines Directory</title>
+<style>
+:root {
+  --primary: #0f766e;
+  --bg: #f4f7f8;
+  --card: #ffffff;
+  --text: #172b35;
+  --muted: #64748b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, "Noto Sans Arabic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+header {
+  background: var(--primary);
+  color: white;
+  padding: 28px 18px;
+}
+.container { max-width: 1050px; margin: auto; }
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+h1 { margin: 0 0 8px; font-size: 27px; }
+header p { margin: 0; line-height: 1.7; }
+button, input, select { font: inherit; }
+button, select {
+  padding: 11px 14px;
+  border: 1px solid #d6e0e5;
+  border-radius: 9px;
+  background: white;
+  cursor: pointer;
+}
+main { padding: 24px 16px; }
+.search-panel {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #d6e0e5;
+  border-radius: 9px;
+}
+.summary { color: var(--muted); margin: 12px 0; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid #e0e8eb;
+  border-radius: 13px;
+  padding: 18px;
+  box-shadow: 0 3px 12px #18334408;
+}
+.card h2 { font-size: 20px; margin: 0 0 8px; }
+.tag {
+  display: inline-block;
+  background: #e2f5f1;
+  color: #115e59;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin: 3px 0 9px;
+}
+.card p { line-height: 1.65; overflow-wrap: anywhere; }
+.label { color: var(--muted); font-size: 13px; }
+.details {
+  border-top: 1px solid #e5ecef;
+  margin-top: 12px;
+  padding-top: 10px;
+}
+.safety {
+  background: #fff7e6;
+  padding: 13px;
+  border-radius: 9px;
+  line-height: 1.6;
+  margin-top: 18px;
+}
+footer {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+[hidden] { display: none !important; }
+@media(max-width:600px) {
+  .search-panel { grid-template-columns: 1fr; }
+  .header-row { align-items: flex-start; flex-direction: column; }
+  h1 { font-size: 23px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="container header-row">
+    <div>
+      <h1 id="siteTitle">Pakistan Medicines Directory</h1>
+      <p id="siteSubtitle">Search medicines, brands and generic names.</p>
+    </div>
+    <button id="languageButton" type="button">اردو</button>
+  </div>
+</header>
+
+<main class="container">
+  <div class="search-panel">
+    <input id="search" type="search"
+      placeholder="Search medicine, brand or generic name..."
+      aria-label="Search medicines">
+    <select id="companyFilter" aria-label="Filter by company">
+      <option value="">All companies</option>
+    </select>
+  </div>
+
+  <p class="summary" id="count" aria-live="polite"></p>
+  <section class="grid" id="medicineGrid" aria-label="Medicines"></section>
+
+  <div class="safety">
+    <strong id="safetyTitle">Medical information notice</strong>
+    <p id="safetyText">
+      This directory is for educational purposes only. It does not replace
+      advice from a qualified doctor or pharmacist. Always check the
+      official product leaflet. Do not start, stop or change a medicine
+      based only on this website.
+    </p>
+  </div>
+</main>
+
+<footer>
+  <p id="footerText">
+    Verify product registration, manufacturer and current product information
+    using the Drug Regulatory Authority of Pakistan (DRAP).
+  </p>
+  <a href="https://www.dra.gov.pk/" target="_blank"
+     rel="noopener noreferrer">Official DRAP website</a>
+  ·
+  <a href="https://eapp.dra.gov.pk/WebProductIndex.php?view=pt24"
+     target="_blank" rel="noopener noreferrer">Registered product search</a>
+</footer>
+
+<script>
+const medicines = [
+  {
+    id: "MED0001",
+    generic: "Paracetamol",
+    brand: "Panadol",
+    company: "Verify current DRAP product record",
+    strength: "500 mg (example)",
+    form: "Tablet",
+    uses: "Relief of pain and fever.",
+    usesUr: "درد اور بخار میں کمی کے لیے۔",
+    side: "Usually well tolerated; allergic reactions can occur. Overdose can severely damage the liver.",
+    sideUr: "عموماً برداشت ہو جاتی ہے؛ الرجی ہو سکتی ہے۔ زیادہ مقدار جگر کو شدید نقصان پہنچا سکتی ہے۔",
+    warnings: "Avoid taking multiple products containing paracetamol.",
+    warningsUr: "ایک سے زیادہ پیراسیٹامول والی ادویات اکٹھی لینے سے گریز کریں۔"
+  },
+  {
+    id: "MED0002",
+    generic: "Amoxicillin + Clavulanic acid",
+    brand: "Augmentin",
+    company: "Verify current DRAP product record",
+    strength: "Strength varies by product",
+    form: "Tablet / oral suspension",
+    uses: "Treatment of certain bacterial infections when prescribed.",
+    usesUr: "ڈاکٹر کے مشورے سے بعض بیکٹیریا کے انفیکشن کے علاج کے لیے۔",
+    side: "Diarrhoea, nausea, vomiting, rash; serious allergy is possible.",
+    sideUr: "اسہال، متلی، قے یا خارش؛ شدید الرجی بھی ہو سکتی ہے۔",
+    warnings: "Not for viral infections. Check penicillin allergy and the prescribed formulation.",
+    warningsUr: "وائرل انفیکشن کے لیے نہیں۔ پینسلین الرجی اور دوا کی درست قسم کے بارے میں ڈاکٹر سے تصدیق کریں۔"
+  },
+  {
+    id: "MED0003",
+    generic: "Cetirizine",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Tablet / oral liquid",
+    uses: "Relief of symptoms of allergic rhinitis and hives.",
+    usesUr: "الرجی، چھینکوں اور چھپاکی کی علامات میں کمی۔",
+    side: "Drowsiness, dry mouth and fatigue may occur.",
+    sideUr: "غنودگی، منہ خشک ہونا یا تھکن ہو سکتی ہے۔",
+    warnings: "Use caution with driving if drowsy; ask a professional about kidney disease.",
+    warningsUr: "غنودگی کی صورت میں گاڑی نہ چلائیں؛ گردوں کی بیماری میں طبی مشورہ لیں۔"
+  },
+  {
+    id: "MED0004",
+    generic: "Omeprazole",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Capsule / tablet",
+    uses: "Reduces stomach acid in selected acid-related conditions.",
+    usesUr: "معدے میں تیزابیت سے متعلق بعض بیماریوں میں تیزاب کم کرتی ہے۔",
+    side: "Headache, abdominal discomfort, nausea or diarrhoea may occur.",
+    sideUr: "سر درد، پیٹ میں تکلیف، متلی یا اسہال ہو سکتا ہے۔",
+    warnings: "Persistent symptoms or long-term use should be reviewed by a clinician.",
+    warningsUr: "مسلسل علامات یا طویل استعمال کے لیے ڈاکٹر سے مشورہ کریں۔"
+  },
+  {
+    id: "MED0005",
+    generic: "Ibuprofen",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Tablet / suspension",
+    uses: "Pain, fever and inflammation.",
+    usesUr: "درد، بخار اور سوزش میں کمی۔",
+    side: "Stomach upset; serious stomach bleeding and kidney problems can occur.",
+    sideUr: "معدے میں تکلیف؛ معدے سے خون بہنے اور گردوں کے مسائل کا خطرہ ہو سکتا ہے۔",
+    warnings: "Not suitable for everyone, including some people with ulcers, kidney disease or pregnancy.",
+    warningsUr: "السر، گردوں کی بیماری یا حمل کی بعض حالتوں میں موزوں نہیں؛ ڈاکٹر سے پوچھیں۔"
+  },
+  {
+    id: "MED0006",
+    generic: "Metformin",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Tablet",
+    uses: "Helps manage blood glucose in type 2 diabetes.",
+    usesUr: "ٹائپ 2 ذیابیطس میں خون میں شوگر کنٹرول کرنے میں مدد دیتی ہے۔",
+    side: "Diarrhoea, nausea and abdominal discomfort may occur.",
+    sideUr: "اسہال، متلی اور پیٹ میں تکلیف ہو سکتی ہے۔",
+    warnings: "Kidney function and other medical conditions must be considered by a clinician.",
+    warningsUr: "گردوں کی کارکردگی اور دوسری بیماریوں کا ڈاکٹر سے جائزہ ضروری ہے۔"
+  },
+  {
+    id: "MED0007",
+    generic: "Amlodipine",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Tablet",
+    uses: "Treatment of high blood pressure and certain types of angina.",
+    usesUr: "ہائی بلڈ پریشر اور انجائنا کی بعض اقسام کے علاج کے لیے۔",
+    side: "Ankle swelling, dizziness and headache may occur.",
+    sideUr: "ٹخنوں میں سوجن، چکر یا سر درد ہو سکتا ہے۔",
+    warnings: "Do not change treatment without consulting your clinician.",
+    warningsUr: "ڈاکٹر کے مشورے کے بغیر علاج میں تبدیلی نہ کریں۔"
+  },
+  {
+    id: "MED0008",
+    generic: "Atorvastatin",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Tablet",
+    uses: "Lowers cholesterol and reduces cardiovascular risk in appropriate patients.",
+    usesUr: "موزوں مریضوں میں کولیسٹرول اور دل کی بیماری کے خطرے کو کم کرتی ہے۔",
+    side: "Muscle pain or digestive symptoms; rare serious muscle injury can occur.",
+    sideUr: "پٹھوں میں درد یا ہاضمے کی علامات؛ شاذونادر شدید عضلاتی نقصان ہو سکتا ہے۔",
+    warnings: "Pregnancy and liver conditions require professional review.",
+    warningsUr: "حمل یا جگر کی بیماری میں طبی ماہر سے مشورہ ضروری ہے۔"
+  },
+  {
+    id: "MED0009",
+    generic: "Azithromycin",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Tablet / oral suspension",
+    uses: "Treats certain bacterial infections when prescribed.",
+    usesUr: "ڈاکٹر کے نسخے پر بعض بیکٹیریا کے انفیکشن کے لیے۔",
+    side: "Nausea, diarrhoea and abdominal pain may occur.",
+    sideUr: "متلی، اسہال اور پیٹ میں درد ہو سکتا ہے۔",
+    warnings: "Antibiotic use requires clinical assessment; heart rhythm risks matter for some patients.",
+    warningsUr: "اینٹی بایوٹک ڈاکٹر کے مشورے سے استعمال کریں؛ بعض مریضوں میں دل کی دھڑکن کے مسائل اہم ہیں۔"
+  },
+  {
+    id: "MED0010",
+    generic: "Salbutamol",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Inhaler / nebuliser solution",
+    uses: "Relieves bronchospasm in conditions such as asthma.",
+    usesUr: "دمہ جیسی بیماریوں میں سانس کی نالیوں کے سکڑاؤ کو کم کرتی ہے۔",
+    side: "Tremor, palpitations and headache may occur.",
+    sideUr: "ہاتھ کانپنا، دل کی دھڑکن تیز ہونا یا سر درد ہو سکتا ہے۔",
+    warnings: "Increasing need for relief medicine can indicate worsening asthma; seek medical review.",
+    warningsUr: "بار بار ریسکیو انہیلر کی ضرورت دمہ بگڑنے کی علامت ہو سکتی ہے؛ طبی معائنہ کروائیں۔"
+  }
+];
+
+const translations = {
+  en: {
+    title: "Pakistan Medicines Directory",
+    subtitle: "Search medicines, brands and generic names.",
+    search: "Search medicine, brand or generic name...",
+    all: "All companies",
+    count: n => `${n} products shown`,
+    generic: "Generic name",
+    brand: "Brand name",
+    company: "Company / manufacturer",
+    strength: "Strength",
+    form: "Dosage form",
+    uses: "Uses",
+    side: "Side effects",
+    warnings: "Warnings",
+    safetyTitle: "Medical information notice",
+    safetyText: "Educational information only; not a substitute for a doctor or pharmacist. Verify the official product leaflet. Do not start, stop or change a medicine based only on this website.",
+    footer: "Verify product registration, manufacturer and current product information with DRAP.",
+    empty: "No matching medicines found."
+  },
+  ur: {
+    title: "پاکستان ادویات ڈائریکٹری",
+    subtitle: "ادویات، برانڈ اور اصل نام تلاش کریں۔",
+    search: "دوا، برانڈ یا اصل نام تلاش کریں...",
+    all: "تمام کمپنیاں",
+    count: n => `${n} ادویات دکھائی جا رہی ہیں`,
+    generic: "اصل نام",
+    brand: "برانڈ کا نام",
+    company: "کمپنی / مینوفیکچرر",
+    strength: "طاقت",
+    form: "قسم",
+    uses: "استعمال",
+    side: "مضر اثرات",
+    warnings: "احتیاطی ہدایات",
+    safetyTitle: "طبی معلومات سے متعلق نوٹس",
+    safetyText: "یہ معلومات صرف تعلیمی مقصد کے لیے ہیں، ڈاکٹر یا فارماسسٹ کے مشورے کا متبادل نہیں۔ اصل پیکٹ کا لیف لیٹ دیکھیں۔ صرف اس ویب سائٹ کی بنیاد پر دوا شروع، بند یا تبدیل نہ کریں۔",
+    footer: "دوا کی رجسٹریشن، کمپنی اور تازہ معلومات DRAP سے تصدیق کریں۔",
+    empty: "کوئی متعلقہ دوا نہیں ملی۔"
+  }
+};
+
+let language = "en";
+const $ = id => document.getElementById(id);
+
+function textFor(m, key) {
+  return language === "ur" && m[key + "Ur"]
+    ? m[key + "Ur"] : m[key] || "Not verified";
+}
+
+function render() {
+  const t = translations[language];
+  const query = $("search").value.trim().toLowerCase();
+  const company = $("companyFilter").value;
+
+  $("siteTitle").textContent = t.title;
+  $("siteSubtitle").textContent = t.subtitle;
+  $("search").placeholder = t.search;
+  $("search").dir = language === "ur" ? "rtl" : "auto";
+  $("safetyTitle").textContent = t.safetyTitle;
+  $("safetyText").textContent = t.safetyText;
+  $("footerText").textContent = t.footer;
+  $("languageButton").textContent = language === "en" ? "اردو" : "English";
+  document.documentElement.lang = language;
+  document.documentElement.dir = "ltr";
+
+  const results = medicines.filter(m => {
+    const searchable = [
+      m.id, m.generic, m.brand, m.company, m.strength, m.form
+    ].join(" ").toLowerCase();
+    return searchable.includes(query) &&
+      (!company || m.company === company);
+  });
+
+  $("count").textContent = t.count(results.length);
+  $("medicineGrid").innerHTML = results.length
+    ? results.map(m => `
+      <article class="card">
+        <span class="tag">${escapeHTML(m.id)}</span>
+        <h2>${escapeHTML(m.generic)}</h2>
+        <p><span class="label">${t.brand}:</span>
+          ${escapeHTML(m.brand)}</p>
+        <p><span class="label">${t.company}:</span>
+          ${escapeHTML(m.company)}</p>
+        <div class="details">
+          <p><strong>${t.strength}:</strong>
+            ${escapeHTML(m.strength)}</p>
+          <p><strong>${t.form}:</strong>
+            ${escapeHTML(m.form)}</p>
+          <p><strong>${t.uses}:</strong>
+            ${escapeHTML(textFor(m, "uses"))}</p>
+          <p><strong>${t.side}:</strong>
+            ${escapeHTML(textFor(m, "side"))}</p>
+          <p><strong>${t.warnings}:</strong>
+            ${escapeHTML(textFor(m, "warnings"))}</p>
+        </div>
+      </article>`).join("")
+    : `<p>${t.empty}</p>`;
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[ch]);
+}
+
+function initCompanies() {
+  const select = $("companyFilter");
+  [...new Set(medicines.map(m => m.company))]
+    .sort()
+    .forEach(name => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    });
+}
+
+$("search").addEventListener("input", render);
+$("companyFilter").addEventListener("change", render);
+$("languageButton").addEventListener("click", () => {
+  language = language === "en" ? "ur" : "en";
+  render();
+});
+
+initCompanies();
+render();
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Bilingual Pakistan medicine directory with generic names, brands, uses and safety information.">
+<title>Pakistan Medicines Directory</title>
+<style>
+:root {
+  --primary: #0f766e;
+  --bg: #f4f7f8;
+  --card: #ffffff;
+  --text: #172b35;
+  --muted: #64748b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, "Noto Sans Arabic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+header {
+  background: var(--primary);
+  color: white;
+  padding: 28px 18px;
+}
+.container { max-width: 1050px; margin: auto; }
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+h1 { margin: 0 0 8px; font-size: 27px; }
+header p { margin: 0; line-height: 1.7; }
+button, input, select { font: inherit; }
+button, select {
+  padding: 11px 14px;
+  border: 1px solid #d6e0e5;
+  border-radius: 9px;
+  background: white;
+  cursor: pointer;
+}
+main { padding: 24px 16px; }
+.search-panel {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #d6e0e5;
+  border-radius: 9px;
+}
+.summary { color: var(--muted); margin: 12px 0; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid #e0e8eb;
+  border-radius: 13px;
+  padding: 18px;
+  box-shadow: 0 3px 12px #18334408;
+}
+.card h2 { font-size: 20px; margin: 0 0 8px; }
+.tag {
+  display: inline-block;
+  background: #e2f5f1;
+  color: #115e59;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin: 3px 0 9px;
+}
+.card p { line-height: 1.65; overflow-wrap: anywhere; }
+.label { color: var(--muted); font-size: 13px; }
+.details {
+  border-top: 1px solid #e5ecef;
+  margin-top: 12px;
+  padding-top: 10px;
+}
+.safety {
+  background: #fff7e6;
+  padding: 13px;
+  border-radius: 9px;
+  line-height: 1.6;
+  margin-top: 18px;
+}
+footer {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+[hidden] { display: none !important; }
+@media(max-width:600px) {
+  .search-panel { grid-template-columns: 1fr; }
+  .header-row { align-items: flex-start; flex-direction: column; }
+  h1 { font-size: 23px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="container header-row">
+    <div>
+      <h1 id="siteTitle">Pakistan Medicines Directory</h1>
+      <p id="siteSubtitle">Search medicines, brands and generic names.</p>
+    </div>
+    <button id="languageButton" type="button">اردو</button>
+  </div>
+</header>
+
+<main class="container">
+  <div class="search-panel">
+    <input id="search" type="search"
+      placeholder="Search medicine, brand or generic name..."
+      aria-label="Search medicines">
+    <select id="companyFilter" aria-label="Filter by company">
+      <option value="">All companies</option>
+    </select>
+  </div>
+
+  <p class="summary" id="count" aria-live="polite"></p>
+  <section class="grid" id="medicineGrid" aria-label="Medicines"></section>
+
+  <div class="safety">
+    <strong id="safetyTitle">Medical information notice</strong>
+    <p id="safetyText">
+      This directory is for educational purposes only. It does not replace
+      advice from a qualified doctor or pharmacist. Always check the
+      official product leaflet. Do not start, stop or change a medicine
+      based only on this website.
+    </p>
+  </div>
+</main>
+
+<footer>
+  <p id="footerText">
+    Verify product registration, manufacturer and current product information
+    using the Drug Regulatory Authority of Pakistan (DRAP).
+  </p>
+  <a href="https://www.dra.gov.pk/" target="_blank"
+     rel="noopener noreferrer">Official DRAP website</a>
+  ·
+  <a href="https://eapp.dra.gov.pk/WebProductIndex.php?view=pt24"
+     target="_blank" rel="noopener noreferrer">Registered product search</a>
+</footer>
+
+<script>
+const medicines = [
+  {
+    id: "MED0001",
+    generic: "Paracetamol",
+    brand: "Panadol",
+    company: "Verify current DRAP product record",
+    strength: "500 mg (example)",
+    form: "Tablet",
+    uses: "Relief of pain and fever.",
+    usesUr: "درد اور بخار میں کمی کے لیے۔",
+    side: "Usually well tolerated; allergic reactions can occur. Overdose can severely damage the liver.",
+    sideUr: "عموماً برداشت ہو جاتی ہے؛ الرجی ہو سکتی ہے۔ زیادہ مقدار جگر کو شدید نقصان پہنچا سکتی ہے۔",
+    warnings: "Avoid taking multiple products containing paracetamol.",
+    warningsUr: "ایک سے زیادہ پیراسیٹامول والی ادویات اکٹھی لینے سے گریز کریں۔"
+  },
+  {
+    id: "MED0002",
+    generic: "Amoxicillin + Clavulanic acid",
+    brand: "Augmentin",
+    company: "Verify current DRAP product record",
+    strength: "Strength varies by product",
+    form: "Tablet / oral suspension",
+    uses: "Treatment of certain bacterial infections when prescribed.",
+    usesUr: "ڈاکٹر کے مشورے سے بعض بیکٹیریا کے انفیکشن کے علاج کے لیے۔",
+    side: "Diarrhoea, nausea, vomiting, rash; serious allergy is possible.",
+    sideUr: "اسہال، متلی، قے یا خارش؛ شدید الرجی بھی ہو سکتی ہے۔",
+    warnings: "Not for viral infections. Check penicillin allergy and the prescribed formulation.",
+    warningsUr: "وائرل انفیکشن کے لیے نہیں۔ پینسلین الرجی اور دوا کی درست قسم کے بارے میں ڈاکٹر سے تصدیق کریں۔"
+  },
+  {
+    id: "MED0003",
+    generic: "Cetirizine",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Tablet / oral liquid",
+    uses: "Relief of symptoms of allergic rhinitis and hives.",
+    usesUr: "الرجی، چھینکوں اور چھپاکی کی علامات میں کمی۔",
+    side: "Drowsiness, dry mouth and fatigue may occur.",
+    sideUr: "غنودگی، منہ خشک ہونا یا تھکن ہو سکتی ہے۔",
+    warnings: "Use caution with driving if drowsy; ask a professional about kidney disease.",
+    warningsUr: "غنودگی کی صورت میں گاڑی نہ چلائیں؛ گردوں کی بیماری میں طبی مشورہ لیں۔"
+  },
+  {
+    id: "MED0004",
+    generic: "Omeprazole",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Capsule / tablet",
+    uses: "Reduces stomach acid in selected acid-related conditions.",
+    usesUr: "معدے میں تیزابیت سے متعلق بعض بیماریوں میں تیزاب کم کرتی ہے۔",
+    side: "Headache, abdominal discomfort, nausea or diarrhoea may occur.",
+    sideUr: "سر درد، پیٹ میں تکلیف، متلی یا اسہال ہو سکتا ہے۔",
+    warnings: "Persistent symptoms or long-term use should be reviewed by a clinician.",
+    warningsUr: "مسلسل علامات یا طویل استعمال کے لیے ڈاکٹر سے مشورہ کریں۔"
+  },
+  {
+    id: "MED0005",
+    generic: "Ibuprofen",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Tablet / suspension",
+    uses: "Pain, fever and inflammation.",
+    usesUr: "درد، بخار اور سوزش میں کمی۔",
+    side: "Stomach upset; serious stomach bleeding and kidney problems can occur.",
+    sideUr: "معدے میں تکلیف؛ معدے سے خون بہنے اور گردوں کے مسائل کا خطرہ ہو سکتا ہے۔",
+    warnings: "Not suitable for everyone, including some people with ulcers, kidney disease or pregnancy.",
+    warningsUr: "السر، گردوں کی بیماری یا حمل کی بعض حالتوں میں موزوں نہیں؛ ڈاکٹر سے پوچھیں۔"
+  },
+  {
+    id: "MED0006",
+    generic: "Metformin",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Tablet",
+    uses: "Helps manage blood glucose in type 2 diabetes.",
+    usesUr: "ٹائپ 2 ذیابیطس میں خون میں شوگر کنٹرول کرنے میں مدد دیتی ہے۔",
+    side: "Diarrhoea, nausea and abdominal discomfort may occur.",
+    sideUr: "اسہال، متلی اور پیٹ میں تکلیف ہو سکتی ہے۔",
+    warnings: "Kidney function and other medical conditions must be considered by a clinician.",
+    warningsUr: "گردوں کی کارکردگی اور دوسری بیماریوں کا ڈاکٹر سے جائزہ ضروری ہے۔"
+  },
+  {
+    id: "MED0007",
+    generic: "Amlodipine",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Tablet",
+    uses: "Treatment of high blood pressure and certain types of angina.",
+    usesUr: "ہائی بلڈ پریشر اور انجائنا کی بعض اقسام کے علاج کے لیے۔",
+    side: "Ankle swelling, dizziness and headache may occur.",
+    sideUr: "ٹخنوں میں سوجن، چکر یا سر درد ہو سکتا ہے۔",
+    warnings: "Do not change treatment without consulting your clinician.",
+    warningsUr: "ڈاکٹر کے مشورے کے بغیر علاج میں تبدیلی نہ کریں۔"
+  },
+  {
+    id: "MED0008",
+    generic: "Atorvastatin",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Tablet",
+    uses: "Lowers cholesterol and reduces cardiovascular risk in appropriate patients.",
+    usesUr: "موزوں مریضوں میں کولیسٹرول اور دل کی بیماری کے خطرے کو کم کرتی ہے۔",
+    side: "Muscle pain or digestive symptoms; rare serious muscle injury can occur.",
+    sideUr: "پٹھوں میں درد یا ہاضمے کی علامات؛ شاذونادر شدید عضلاتی نقصان ہو سکتا ہے۔",
+    warnings: "Pregnancy and liver conditions require professional review.",
+    warningsUr: "حمل یا جگر کی بیماری میں طبی ماہر سے مشورہ ضروری ہے۔"
+  },
+  {
+    id: "MED0009",
+    generic: "Azithromycin",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Tablet / oral suspension",
+    uses: "Treats certain bacterial infections when prescribed.",
+    usesUr: "ڈاکٹر کے نسخے پر بعض بیکٹیریا کے انفیکشن کے لیے۔",
+    side: "Nausea, diarrhoea and abdominal pain may occur.",
+    sideUr: "متلی، اسہال اور پیٹ میں درد ہو سکتا ہے۔",
+    warnings: "Antibiotic use requires clinical assessment; heart rhythm risks matter for some patients.",
+    warningsUr: "اینٹی بایوٹک ڈاکٹر کے مشورے سے استعمال کریں؛ بعض مریضوں میں دل کی دھڑکن کے مسائل اہم ہیں۔"
+  },
+  {
+    id: "MED0010",
+    generic: "Salbutamol",
+    brand: "Brand varies",
+    company: "Verify current DRAP product record",
+    strength: "Varies by product",
+    form: "Inhaler / nebuliser solution",
+    uses: "Relieves bronchospasm in conditions such as asthma.",
+    usesUr: "دمہ جیسی بیماریوں میں سانس کی نالیوں کے سکڑاؤ کو کم کرتی ہے۔",
+    side: "Tremor, palpitations and headache may occur.",
+    sideUr: "ہاتھ کانپنا، دل کی دھڑکن تیز ہونا یا سر درد ہو سکتا ہے۔",
+    warnings: "Increasing need for relief medicine can indicate worsening asthma; seek medical review.",
+    warningsUr: "بار بار ریسکیو انہیلر کی ضرورت دمہ بگڑنے کی علامت ہو سکتی ہے؛ طبی معائنہ کروائیں۔"
+  }
+];
+
+const translations = {
+  en: {
+    title: "Pakistan Medicines Directory",
+    subtitle: "Search medicines, brands and generic names.",
+    search: "Search medicine, brand or generic name...",
+    all: "All companies",
+    count: n => `${n} products shown`,
+    generic: "Generic name",
+    brand: "Brand name",
+    company: "Company / manufacturer",
+    strength: "Strength",
+    form: "Dosage form",
+    uses: "Uses",
+    side: "Side effects",
+    warnings: "Warnings",
+    safetyTitle: "Medical information notice",
+    safetyText: "Educational information only; not a substitute for a doctor or pharmacist. Verify the official product leaflet. Do not start, stop or change a medicine based only on this website.",
+    footer: "Verify product registration, manufacturer and current product information with DRAP.",
+    empty: "No matching medicines found."
+  },
+  ur: {
+    title: "پاکستان ادویات ڈائریکٹری",
+    subtitle: "ادویات، برانڈ اور اصل نام تلاش کریں۔",
+    search: "دوا، برانڈ یا اصل نام تلاش کریں...",
+    all: "تمام کمپنیاں",
+    count: n => `${n} ادویات دکھائی جا رہی ہیں`,
+    generic: "اصل نام",
+    brand: "برانڈ کا نام",
+    company: "کمپنی / مینوفیکچرر",
+    strength: "طاقت",
+    form: "قسم",
+    uses: "استعمال",
+    side: "مضر اثرات",
+    warnings: "احتیاطی ہدایات",
+    safetyTitle: "طبی معلومات سے متعلق نوٹس",
+    safetyText: "یہ معلومات صرف تعلیمی مقصد کے لیے ہیں، ڈاکٹر یا فارماسسٹ کے مشورے کا متبادل نہیں۔ اصل پیکٹ کا لیف لیٹ دیکھیں۔ صرف اس ویب سائٹ کی بنیاد پر دوا شروع، بند یا تبدیل نہ کریں۔",
+    footer: "دوا کی رجسٹریشن، کمپنی اور تازہ معلومات DRAP سے تصدیق کریں۔",
+    empty: "کوئی متعلقہ دوا نہیں ملی۔"
+  }
+};
+
+let language = "en";
+const $ = id => document.getElementById(id);
+
+function textFor(m, key) {
+  return language === "ur" && m[key + "Ur"]
+    ? m[key + "Ur"] : m[key] || "Not verified";
+}
+
+function render() {
+  const t = translations[language];
+  const query = $("search").value.trim().toLowerCase();
+  const company = $("companyFilter").value;
+
+  $("siteTitle").textContent = t.title;
+  $("siteSubtitle").textContent = t.subtitle;
+  $("search").placeholder = t.search;
+  $("search").dir = language === "ur" ? "rtl" : "auto";
+  $("safetyTitle").textContent = t.safetyTitle;
+  $("safetyText").textContent = t.safetyText;
+  $("footerText").textContent = t.footer;
+  $("languageButton").textContent = language === "en" ? "اردو" : "English";
+  document.documentElement.lang = language;
+  document.documentElement.dir = "ltr";
+
+  const results = medicines.filter(m => {
+    const searchable = [
+      m.id, m.generic, m.brand, m.company, m.strength, m.form
+    ].join(" ").toLowerCase();
+    return searchable.includes(query) &&
+      (!company || m.company === company);
+  });
+
+  $("count").textContent = t.count(results.length);
+  $("medicineGrid").innerHTML = results.length
+    ? results.map(m => `
+      <article class="card">
+        <span class="tag">${escapeHTML(m.id)}</span>
+        <h2>${escapeHTML(m.generic)}</h2>
+        <p><span class="label">${t.brand}:</span>
+          ${escapeHTML(m.brand)}</p>
+        <p><span class="label">${t.company}:</span>
+          ${escapeHTML(m.company)}</p>
+        <div class="details">
+          <p><strong>${t.strength}:</strong>
+            ${escapeHTML(m.strength)}</p>
+          <p><strong>${t.form}:</strong>
+            ${escapeHTML(m.form)}</p>
+          <p><strong>${t.uses}:</strong>
+            ${escapeHTML(textFor(m, "uses"))}</p>
+          <p><strong>${t.side}:</strong>
+            ${escapeHTML(textFor(m, "side"))}</p>
+          <p><strong>${t.warnings}:</strong>
+            ${escapeHTML(textFor(m, "warnings"))}</p>
+        </div>
+      </article>`).join("")
+    : `<p>${t.empty}</p>`;
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[ch]);
+}
+
+function initCompanies() {
+  const select = $("companyFilter");
+  [...new Set(medicines.map(m => m.company))]
+    .sort()
+    .forEach(name => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    });
+}
+
+$("search").addEventListener("input", render);
+$("companyFilter").addEventListener("change", render);
+$("languageButton").addEventListener("click", () => {
+  language = language === "en" ? "ur" : "en";
+  render();
+});
+
+initCompanies();
+render();
+</script>
+</body>
+</html>
